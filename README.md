@@ -1,16 +1,22 @@
-# React + Vite
+# Farmabot POS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema de Punto de Venta (POS) desarrollado en React para la gestión de ventas, dispensación de medicamentos y atención al cliente. Este proyecto forma parte de la tesis: "Chatbot Integrado al Punto de Venta para Optimización de la Atención y Automatización de Procesos en Farmacias".
 
-Currently, two official plugins are available:
+## Características
+- Búsqueda Dinámica: Filtrado de medicamentos por nombre, laboratorio o código de barras en tiempo real.
+- Gestión de Carrito: Hook personalizado (useCart) para el manejo de estado, cálculos de totales y persistencia.
+- Validación de Lealtad: Integración con sistema de tarjetas de beneficios (14 dígitos).
+- Diseño Responsivo: Interfaz moderna construida con Tailwind CSS.
+-Integración: Comunicación asíncrona con el backend (FastAPI) para sincronización de stock.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tecnologías Utilizadas
+- Frontend: React.js + Vite
+- Estilos: Tailwind CSS
+- Iconos: Lucide React
+- Estado: React Hooks (Custom Hooks)
 
-## React Compiler
+## Conectividad
+Este frontend requiere que el repositorio farmabot-backend esté en ejecución para procesar las ventas y consultar el inventario.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Autor
+Leonardo Pantoja Canchola - Ingeniería de Software - Matrícula: 214960
