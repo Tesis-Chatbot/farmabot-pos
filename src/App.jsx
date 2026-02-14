@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/sidebar"; // Importación correcta
 import POS from "./pages/POS";
+import TarjetasCliente from "./pages/TarjetasCliente";
 
 export default function App() {
   return (
@@ -13,7 +14,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<POS />} />
             <Route path="/inventario" element={<div className="p-6">Pantalla de Inventario</div>} />
-            <Route path="/clientes" element={<div className="p-6">Pantalla de Clientes</div>} />
+            <Route path="/clientes" element={<TarjetasCliente />} />
           </Routes>
         </main>
       </div>

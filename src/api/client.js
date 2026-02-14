@@ -1,19 +1,32 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // FastAPI url
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-async function getMedicament() {
-  const response = await fetch(`${API_URL}/medicamentos`);
-  const datos = await response.json();
-  console.log(datos);
-  return datos;
-}
+// Función para obtener medicamentos usando la instancia
+export const getMedicaments = async () => {
+  try {
+    const response = await api.get("/medicamentos");
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener medicamentos:", error);
+    throw error;
+  }
+};
 
-
+// Función para obtener cliente usando la instancia
+export const getClientByCard = async (cardNumber) => {
+  try {
+    const response = await api.get(`/clientes/${cardNumber}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener cliente:", error);
+    throw error;
+  }
+};
 
 export default api;
