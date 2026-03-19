@@ -3,10 +3,9 @@ import { NavLink } from "react-router-dom";
 // Definimos las rutas de tu sistema de farmacia
 const menuItems = [
   { icon: "🏪", label: "Caja", path: "/" },
-  { icon: "📦", label: "Inventario", path: "/inventario" },
   { icon: "👥", label: "Clientes", path: "/clientes" },
   { icon: "📊", label: "Reportes", path: "/reportes" },
-  { icon: "⚙️", label: "Configuración", path: "/config" },
+  { icon: "⚙️", label: "Chatbot", path: "/chatbot" },
 ];
 
 export default function Sidebar() {
