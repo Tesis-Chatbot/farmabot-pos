@@ -1,51 +1,71 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../api/client';
+import { useState, useEffect } from "react";
+import { supabase } from "./client";
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchProfile = async (uuid) => {
+    try {
+      const { data, error } = await supabase
+        .from("users") // Tu tabla en public
+        .select("*")
+        .eq("uuid", uuid)
+        .single();
+
+      if (error) throw error;
+      setUser(data);
+    } catch (error) {
+      console.error("Error cargando perfil:", error.message);
+      setUser(null);
+    }
+  };
+
   useEffect(() => {
-    // 1. Verificar sesión actual al cargar
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    // 1. Verificar sesión inicial
+    const initializeAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session) {
         await fetchProfile(session.user.id);
       }
       setLoading(false);
     };
 
-    getSession();
+    initializeAuth();
 
-    // 2. Escuchar cambios (login/logout)
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
-        await fetchProfile(session.user.id);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
+    // 2. Escuchar cambios de estado (Login/Logout)
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setLoading(true);
+        if (session) {
+          await fetchProfile(session.user.id);
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      },
+    );
 
-    return () => authListener.subscription.unsubscribe();
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
-  const fetchProfile = async (uuid) => {
-    const { data, error } = await supabase
-      .from('users') // Tu tabla en public
-      .select('*')
-      .eq('uuid', uuid)
-      .single();
-    
-    if (!error) setUser(data);
-  };
-
   const login = async (email, password) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     if (error) throw error;
+    // No hace falta hacer nada más, onAuthStateChange detectará el cambio
   };
 
-  const logout = () => supabase.auth.signOut();
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   return { user, login, logout, loading };
 };
