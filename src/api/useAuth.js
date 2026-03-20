@@ -1,3 +1,4 @@
+// src/api/useAuth.js
 import { useState, useEffect } from "react";
 import { supabase } from "./client";
 
@@ -6,49 +7,65 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (uuid) => {
+    if (!uuid) return null;
     try {
       const { data, error } = await supabase
-        .from("users") // Tu tabla en public
+        .from("users")
         .select("*")
         .eq("uuid", uuid)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      setUser(data);
+      return data;
     } catch (error) {
-      console.error("Error cargando perfil:", error.message);
-      setUser(null);
+      console.error("Error en fetchProfile:", error.message);
+      return null;
     }
   };
 
   useEffect(() => {
-    // 1. Verificar sesión inicial
-    const initializeAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session) {
-        await fetchProfile(session.user.id);
+    let isMounted = true;
+
+    const initialize = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session && isMounted) {
+          const profile = await fetchProfile(session.user.id);
+          setUser(profile);
+        }
+      } catch (err) {
+        console.error("Error inicializando auth:", err);
+      } finally {
+        if (isMounted) setLoading(false); // Cerramos carga pase lo que pase
       }
-      setLoading(false);
     };
 
-    initializeAuth();
+    initialize();
 
-    // 2. Escuchar cambios de estado (Login/Logout)
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setLoading(true);
+        // Log para debuggear en consola
+        console.log("Evento Auth:", event);
+
         if (session) {
-          await fetchProfile(session.user.id);
+          const profile = await fetchProfile(session.user.id);
+          if (isMounted) {
+            setUser(profile);
+            setLoading(false);
+          }
         } else {
-          setUser(null);
+          if (isMounted) {
+            setUser(null);
+            setLoading(false);
+          }
         }
-        setLoading(false);
       },
     );
 
     return () => {
+      isMounted = false;
       authListener.subscription.unsubscribe();
     };
   }, []);
@@ -59,7 +76,6 @@ export const useAuth = () => {
       password,
     });
     if (error) throw error;
-    // No hace falta hacer nada más, onAuthStateChange detectará el cambio
   };
 
   const logout = async () => {
