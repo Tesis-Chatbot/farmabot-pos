@@ -1,25 +1,30 @@
 import CartItem from "./CartItem";
+import { ShoppingCart } from "lucide-react";
 
 export default function Cart({ cart, onRemove, onUpdateQty }) {
-  return (
-    <div
-      className="
-        bg-white rounded-xl shadow
-        p-4 h-full flex flex-col
-      "
-    >
-      <h2 className="text-xl font-bold mb-4">Carrito</h2>
+  if (cart.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-slate-300 py-20">
+        <ShoppingCart size={48} className="mb-4 opacity-20" />
+        <p className="text-sm font-medium italic">No hay productos en la orden</p>
+      </div>
+    );
+  }
 
-      <div className="flex-1 overflow-y-auto space-y-2">
-        {cart.map((item) => (
+  return (
+    <div className="flex flex-col h-full space-y-3 animate-in fade-in duration-300">
+      {cart.map((item) => (
+        <div 
+          key={item.id} 
+          className="bg-white border border-slate-100 rounded-xl p-1 hover:border-blue-200 transition-colors shadow-sm"
+        >
           <CartItem
-            key={item.id}
             item={item}
             onRemove={onRemove}
             onUpdateQty={onUpdateQty}
           />
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }

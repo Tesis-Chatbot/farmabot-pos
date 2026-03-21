@@ -1,64 +1,97 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../api/useAuth";
+import { 
+  LayoutDashboard, 
+  Users, 
+  BarChart3, 
+  MessageSquareCode, 
+  LogOut,
+  Store,
+  PillBottle 
+} from "lucide-react";
 
-// Definimos las rutas de tu sistema de farmacia
 const menuItems = [
-  { icon: "🏪", label: "Caja", path: "/" },
-  { icon: "📦", label: "Inventario", path: "/inventario" },
-  { icon: "👥", label: "Clientes", path: "/clientes" },
-  { icon: "📊", label: "Reportes", path: "/reportes" },
-  { icon: "⚙️", label: "Configuración", path: "/config" },
+  { icon: <Store size={22} />, label: "Caja", path: "/", roles: ["admin", "cajero"] },
+  { icon: <Users size={22} />, label: "Clientes", path: "/clientes", roles: ["admin", "cajero"] },
+  { icon: <PillBottle  size={22} />, label: "Promociones", path: "/promociones", roles: ["admin"] },
+  { icon: <BarChart3 size={22} />, label: "Reportes", path: "/reportes", roles: ["admin"] },
+  { icon: <MessageSquareCode size={22} />, label: "Chatbot", path: "/chatbot", roles: ["admin", "cajero"] },
 ];
 
 export default function Sidebar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
+
   return (
-    <aside className="w-20 lg:w-64 bg-[#1e293b] text-white flex flex-col h-screen sticky top-0 z-50 transition-all duration-300">
-      {/* LOGO / NOMBRE DE LA APP */}
+    <aside className="w-20 lg:w-64 bg-[#1e293b] text-white flex flex-col h-screen sticky top-0 z-50 transition-all duration-300 shadow-2xl">
+      {/* LOGO */}
       <div className="p-6 flex items-center gap-3">
-        <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-bold shadow-lg shadow-blue-500/20">
+        <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center font-black shadow-lg shadow-blue-500/30 text-white transform rotate-3">
           F
         </div>
-        <span className="hidden lg:block font-bold text-xl tracking-tight text-white">
-          FarmaBot
+        <span className="hidden lg:block font-black text-xl tracking-tight text-white">
+          Farma<span className="text-blue-400">Bot</span>
         </span>
       </div>
 
-      {/* NAVEGACIÓN PRINCIPAL */}
-      <nav className="flex-1 mt-4">
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.label}
-            to={item.path}
-            className={({ isActive }) => `
-              flex items-center gap-4 px-6 py-4 cursor-pointer transition-all duration-200
-              ${isActive 
-                ? "bg-blue-600 border-r-4 border-white text-white" 
-                : "hover:bg-gray-800 text-gray-400"}
-            `}
-          >
-            <span className="text-xl">{item.icon}</span>
-            <span className="hidden lg:block font-medium">{item.label}</span>
-          </NavLink>
-        ))}
+      {/* NAVEGACIÓN DINÁMICA SEGÚN ROL */}
+      <nav className="flex-1 mt-6 space-y-1">
+        {menuItems.map((item) => {
+          if (item.roles && !item.roles.includes(user?.role)) return null;
+
+          return (
+            <NavLink
+              key={item.label}
+              to={item.path}
+              className={({ isActive }) => `
+                flex items-center gap-4 px-6 py-4 cursor-pointer transition-all duration-200 group
+                ${isActive 
+                  ? "bg-blue-600/10 border-r-4 border-blue-500 text-blue-400" 
+                  : "hover:bg-gray-800/50 text-gray-400 hover:text-white"}
+              `}
+            >
+              <div className="transition-transform duration-200 group-hover:scale-110">
+                {item.icon}
+              </div>
+              <span className="hidden lg:block font-bold tracking-wide">{item.label}</span>
+            </NavLink>
+          );
+        })}
       </nav>
 
-      {/* FOOTER DEL USUARIO (Basado en tus datos de tesis) */}
-      <div className="p-6 border-t border-gray-700 bg-[#1a2232]">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-400 border-2 border-gray-600 overflow-hidden flex-shrink-0">
+      {/* FOOTER DEL USUARIO */}
+      <div className="p-4 border-t border-gray-800 bg-[#1a2232]/50 backdrop-blur-sm">
+        <div className="flex items-center gap-3 mb-6 p-2">
+          <div className="w-10 h-10 rounded-full border-2 border-blue-500/30 p-0.5 overflow-hidden flex-shrink-0 shadow-inner">
             <img 
-              src="https://ui-avatars.com/api/?name=Leonardo+Pantoja&background=3b82f6&color=fff" 
-              alt="User Avatar" 
+              className="w-full h-full rounded-full object-cover"
+              src={`https://ui-avatars.com/api/?name=${user?.name}+${user?.lastname1}&background=2563eb&color=fff&bold=true`} 
+              alt="User" 
             />
           </div>
           <div className="hidden lg:block overflow-hidden">
-            <p className="text-sm font-bold truncate text-gray-100">
-              Leonardo Pantoja
+            <p className="text-xs font-black truncate text-gray-100 uppercase tracking-tighter">
+              {user?.name} {user?.lastname1}
             </p>
-            <p className="text-[11px] text-blue-400 font-medium uppercase tracking-wider">
-              Cajero
+            <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-0.5">
+              {user?.role}
             </p>
           </div>
         </div>
+
+        {/* BOTÓN DE CERRAR SESIÓN */}
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-500 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all group"
+        >
+          <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
+          <span className="hidden lg:block">Salir del Sistema</span>
+        </button>
       </div>
     </aside>
   );
