@@ -6,6 +6,7 @@ import Login from "./pages/Login"; // Asegúrate de crear este archivo
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { useAuth } from "./api/useAuth";
 
+
 export default function App() {
   const { user, loading } = useAuth();
 
