@@ -6,24 +6,39 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// --- CONFIGURACIÓN DE AXIOS ---
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
+  timeout: 8000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Interceptor opcional: Inyecta el token de Supabase en cada petición de Axios a FastAPI
-api.interceptors.request.use(async (config) => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.access_token) {
-    config.headers.Authorization = `Bearer ${session.access_token}`;
-  }
-  return config;
-});
+// INTERCEPTOR CORREGIDO: Sin async/await para evitar bloqueos de red
+api.interceptors.request.use(
+  (config) => {
+    try {
+      // Buscamos la sesión directamente en el almacenamiento de Supabase
+      const storageKey = `sb-${new URL(supabaseUrl).hostname.split(".")[0]}-auth-token`;
+      const sessionData = localStorage.getItem(storageKey);
 
-// --- TUS FUNCIONES EXISTENTES ---
+      if (sessionData) {
+        const parsed = JSON.parse(sessionData);
+        const token = parsed?.access_token;
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      }
+    } catch (err) {
+      console.error("Error al recuperar token en interceptor:", err);
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
+
 export const getMedicaments = async () => {
   try {
     const response = await api.get("/medicamentos");
@@ -35,11 +50,21 @@ export const getMedicaments = async () => {
 };
 
 export const getClientByCard = async (cardNumber) => {
+  if (!cardNumber) throw new Error("Número de tarjeta requerido");
+
   try {
+    // El log ahora debería aparecer justo antes de que veas la petición en Network
+    console.log("🚀 Disparando petición a la API...");
     const response = await api.get(`/clientes/${cardNumber}`);
     return response.data;
   } catch (error) {
-    console.error("Error al obtener cliente:", error);
+    if (error.code === "ECONNABORTED") {
+      throw new Error("El servidor tardó demasiado en responder (Timeout).");
+    }
+    console.error(
+      "Error al obtener cliente:",
+      error.response?.data || error.message,
+    );
     throw error;
   }
 };

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* 1. Importar Iconos de Google (Material Icons Round es la versión más moderna) */
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round');
+
 html, body, #root {
   width: 100%;
   height: 100%;
@@ -8,4 +11,27 @@ html, body, #root {
 body {
   margin: 0;
   background-color: #f3f4f6; /* gris claro */
+  /* 2. Opcional: Definir la fuente predeterminada para que se vea más limpia */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* 3. Animación para la barra de progreso de lealtad */
+@keyframes shimmer {
+  0% { background-position: -40px 0; }
+  100% { background-position: 40px 0; }
+}
+
+.animate-shimmer {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 40px 40px;
+  animation: shimmer 2s linear infinite;
 }
