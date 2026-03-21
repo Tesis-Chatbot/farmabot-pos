@@ -6,13 +6,14 @@ import {
   BarChart3, 
   MessageSquareCode, 
   LogOut,
-  Store
+  Store,
+  PillBottle 
 } from "lucide-react";
 
-// Definimos los items con componentes de Lucide
 const menuItems = [
   { icon: <Store size={22} />, label: "Caja", path: "/", roles: ["admin", "cajero"] },
   { icon: <Users size={22} />, label: "Clientes", path: "/clientes", roles: ["admin", "cajero"] },
+  { icon: <PillBottle  size={22} />, label: "Promociones", path: "/promociones", roles: ["admin"] },
   { icon: <BarChart3 size={22} />, label: "Reportes", path: "/reportes", roles: ["admin"] },
   { icon: <MessageSquareCode size={22} />, label: "Chatbot", path: "/chatbot", roles: ["admin", "cajero"] },
 ];
