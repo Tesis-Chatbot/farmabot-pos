@@ -4,7 +4,7 @@ const LoyaltySummary = ({ resumen }) => {
   return (
     <div className="bg-white p-6 rounded-xl shadow-md border border-blue-100 mb-8">
       <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-        🎁 Beneficios y Regalos (3+1)
+        🎁 Beneficios y Regalos
       </h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
