@@ -7,7 +7,8 @@ import {
 import Sidebar from "./components/sidebar";
 import POS from "./pages/POS";
 import TarjetasCliente from "./pages/TarjetasCliente";
-import Login from "./pages/Login"; // Asegúrate de crear este archivo
+import Login from "./pages/Login"; 
+import PromotionsAdmin from "./pages/PromocionesAdmin";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { useAuth } from "./api/useAuth";
 
@@ -59,9 +60,7 @@ export default function App() {
               path="/promociones"
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold">Panel de promociones</h1>
-                  </div>
+                  <PromotionsAdmin />
                 </ProtectedRoute>
               }
             />

@@ -5,7 +5,7 @@ export default function ProductSearch({ onSearch }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSearch(query); // Solo llama a la API aquí
+    onSearch(query);
   };
 
   return (

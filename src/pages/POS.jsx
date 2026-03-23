@@ -4,7 +4,7 @@ import ProductSearch from "../components/productSearch";
 import ProductList from "../components/productList";
 import Cart from "../components/cart";
 import Checkout from "../components/checkout";
-import Modal from "../components/Modal"; // Asegúrate de haber creado este componente
+import Modal from "../components/Modal";
 import {
   ShoppingBag,
   Store,
