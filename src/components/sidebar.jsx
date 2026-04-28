@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../api/useAuth";
+import { ROLES } from "../context/AuthContext";
 import { 
   LayoutDashboard, 
   Users, 
@@ -11,11 +12,11 @@ import {
 } from "lucide-react";
 
 const menuItems = [
-  { icon: <Store size={22} />, label: "Caja", path: "/", roles: ["admin", "cajero"] },
-  { icon: <Users size={22} />, label: "Clientes", path: "/clientes", roles: ["admin", "cajero"] },
-  { icon: <PillBottle  size={22} />, label: "Promociones", path: "/promociones", roles: ["admin"] },
-  { icon: <BarChart3 size={22} />, label: "Reportes", path: "/reportes", roles: ["admin"] },
-  { icon: <MessageSquareCode size={22} />, label: "Chatbot", path: "/chatbot", roles: ["admin", "cajero"] },
+  { icon: <Store />, label: "Caja", path: "/", roles: [ROLES.ADMIN, ROLES.CAJERO] },
+  { icon: <Users size={22} />, label: "Clientes", path: "/clientes", roles: [ROLES.ADMIN, ROLES.CAJERO] },
+  { icon: <PillBottle />, label: "Promociones", path: "/promociones", roles: [ROLES.ADMIN] },
+  { icon: <BarChart3 size={22} />, label: "Reportes", path: "/reportes", roles: [ROLES.ADMIN] },
+  { icon: <MessageSquareCode size={22} />, label: "Chatbot", path: "/chatbot", roles: [ROLES.ADMIN, ROLES.CAJERO] },
 ];
 
 export default function Sidebar() {

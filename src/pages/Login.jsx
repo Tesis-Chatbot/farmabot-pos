@@ -40,7 +40,7 @@ export default function Login() {
       >
         <div className="text-center mb-8">
           <h2 className="text-3xl font-extrabold text-slate-800">
-            Software POS
+            FarmaBot POS
           </h2>
           <p className="text-slate-500 mt-2">
             Ingresa tus credenciales para continuar

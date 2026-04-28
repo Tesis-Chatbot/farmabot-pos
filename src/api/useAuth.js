@@ -6,17 +6,36 @@ export const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (uuid) => {
-    if (!uuid) return null;
+  const fetchProfile = async (id) => {
+    if (!id) return null;
     try {
       const { data, error } = await supabase
         .from("users")
-        .select("*")
-        .eq("uuid", uuid)
+        .select(
+          `
+        id,
+        name,
+        lastname1,
+        lastname2,
+        role_id,
+        roles (
+          role
+        )
+      `,
+        )
+        .eq("id", id)
         .maybeSingle();
 
       if (error) throw error;
-      return data;
+
+      if (data) {
+        return {
+          ...data,
+          role: data.roles?.role || "cajero",
+        };
+      }
+
+      return null;
     } catch (error) {
       console.error("Error en fetchProfile:", error.message);
       return null;

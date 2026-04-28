@@ -9,6 +9,8 @@ import POS from "./pages/POS";
 import TarjetasCliente from "./pages/TarjetasCliente";
 import Login from "./pages/Login"; 
 import PromotionsAdmin from "./pages/PromocionesAdmin";
+import ReportsDashboard from "./pages/Dashboard";
+import Chatbot from "./pages/Chatbot";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { useAuth } from "./api/useAuth";
 
@@ -69,14 +71,7 @@ export default function App() {
               path="/reportes"
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
-                  <div className="p-8">
-                    <h1 className="text-2xl font-black text-gray-800">
-                      📊 Panel de Reportes
-                    </h1>
-                    <p className="text-gray-500 mt-2">
-                      Bienvenido, administrador. Aquí verás las métricas.
-                    </p>
-                  </div>
+                  <ReportsDashboard />
                 </ProtectedRoute>
               }
             />
@@ -85,14 +80,7 @@ export default function App() {
               path="/chatbot"
               element={
                 <ProtectedRoute>
-                  <div className="p-8">
-                    <h1 className="text-2xl font-black text-gray-800">
-                      🤖 Asistente Virtual
-                    </h1>
-                    <p className="text-gray-500 mt-2">
-                      Configuración y entrenamiento del chatbot.
-                    </p>
-                  </div>
+                  <Chatbot />
                 </ProtectedRoute>
               }
             />
