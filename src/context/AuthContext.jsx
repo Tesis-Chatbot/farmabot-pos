@@ -3,7 +3,6 @@ import { supabase } from "../api/client";
 
 const AuthContext = createContext();
 
-// Constantes de roles para evitar errores de dedo en toda la app
 export const ROLES = {
   ADMIN: "admin",
   CAJERO: "cajero",
@@ -13,43 +12,53 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (authId) => {
-    if (!authId) return null;
+  const fetchProfile = async (authUuid) => {
+    if (!authUuid) return null;
     try {
-      const { data, error } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from("users")
         .select(
           `
-        id,
-        uuid,
-        name,
-        role_id,
-        roles (
-          role
-        )
+        id, 
+        uuid, 
+        name, 
+        lastname1, 
+        lastname2, 
+        role_id, 
+        roles ( role )
       `,
         )
-        .eq("uuid", authId)
+        .eq("uuid", authUuid)
         .maybeSingle();
 
-      if (error) throw error;
+      if (userError) throw userError;
+      if (!userData) return null;
+      const { data: cashierData, error: cashierError } = await supabase
+        .from("cashiers")
+        .select("store_id, employee_code, pos_terminal")
+        .eq("user_id", userData.id)
+        .maybeSingle();
 
-      if (data) {
-        return {
-          ...data,
-          role: data.roles?.role || ROLES.CAJERO,
-        };
+      if (cashierError) {
+        console.error("Error buscando en cashiers:", cashierError.message);
       }
 
-      console.warn("No se encontró el perfil para el UUID:", authId);
-      return null;
+      return {
+        id: userData.id,
+        uuid: userData.uuid,
+        name: userData.name,
+        full_name: `${userData.name} ${userData.lastname1 || ""}`.trim(),
+        role: userData.roles?.role || ROLES.CAJERO,
+        store_id: cashierData?.store_id || null,
+        employee_code: cashierData?.employee_code || null,
+        pos_terminal: cashierData?.pos_terminal || null,
+      };
     } catch (error) {
-      console.error("Error en fetchProfile:", error.message);
+      console.error("Error crítico en fetchProfile:", error.message);
       return null;
     }
   };
 
-  // Efecto para manejar el estado de la sesión de forma global
   useEffect(() => {
     let isMounted = true;
 
@@ -59,11 +68,10 @@ export const AuthProvider = ({ children }) => {
           data: { session },
         } = await supabase.auth.getSession();
         if (session && isMounted) {
+          // session.user.id es el UUID de Auth
           const profile = await fetchProfile(session.user.id);
           setUser(profile);
         }
-      } catch (err) {
-        console.error("Error inicializando auth:", err);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -71,21 +79,15 @@ export const AuthProvider = ({ children }) => {
 
     initialize();
 
-    // Listener de cambios de autenticación (Login, Logout, Token refreshed)
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session) {
           const profile = await fetchProfile(session.user.id);
-          if (isMounted) {
-            setUser(profile);
-            setLoading(false);
-          }
+          setUser(profile);
         } else {
-          if (isMounted) {
-            setUser(null);
-            setLoading(false);
-          }
+          setUser(null);
         }
+        setLoading(false);
       },
     );
 
@@ -95,16 +97,12 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  // Función de login optimizada para actualizar el estado inmediatamente
   const login = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-
     if (error) throw error;
-
-    // Actualización imperativa del estado para forzar la redirección en App.jsx
     if (data?.user) {
       const profile = await fetchProfile(data.user.id);
       setUser(profile);
@@ -123,11 +121,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Hook personalizado para consumir el contexto de forma sencilla
-export const useAuthContext = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuthContext debe usarse dentro de un AuthProvider");
-  }
-  return context;
-};
+export const useAuthContext = () => useContext(AuthContext);
