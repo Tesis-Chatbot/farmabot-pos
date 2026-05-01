@@ -1,6 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../api/useAuth";
-import { ROLES } from "../context/AuthContext";
+import { AuthProvider, useAuthContext, ROLES } from "../context/AuthContext";
 import { 
   LayoutDashboard, 
   Users, 
@@ -20,7 +19,7 @@ const menuItems = [
 ];
 
 export default function Sidebar() {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthContext();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
