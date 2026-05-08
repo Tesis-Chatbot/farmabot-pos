@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
         uuid: userData.uuid,
         name: userData.name,
         full_name: `${userData.name} ${userData.lastname1 || ""}`.trim(),
-        role: userData.roles?.role || ROLES.CAJERO,
+        role: userData.role_id === 1 ? ROLES.ADMIN : ROLES.CAJERO,
         store_id: cashierData?.store_id || null,
         employee_code: cashierData?.employee_code || null,
         pos_terminal: cashierData?.pos_terminal || null,

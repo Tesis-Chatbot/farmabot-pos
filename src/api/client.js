@@ -39,9 +39,9 @@ api.interceptors.request.use(
   },
 );
 
-export const getMedicaments = async () => {
+export const getMedicaments = async (storeId) => {
   try {
-    const response = await api.get("/medicamentos");
+    const response = await api.get(`/medicamentos?store_id=${storeId}`);
     return response.data;
   } catch (error) {
     console.error("Error al obtener medicamentos:", error);
