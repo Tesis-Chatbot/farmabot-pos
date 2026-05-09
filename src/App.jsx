@@ -11,7 +11,6 @@ import { AuthProvider, useAuthContext, ROLES } from "./context/AuthContext";
 
 function AppContent() {
   const { user, loading } = useAuthContext();
-  console.log("Cambio de estado detectado:", { user, loading });
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#1e293b] text-white font-bold text-center">

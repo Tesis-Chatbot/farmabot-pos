@@ -50,7 +50,6 @@ export default function ChatReal() {
     });
 
     socket.on("bot_uttered", (message) => {
-      console.log("Evento bot_uttered disparado:", message);
       setIsTyping(false);
 
       const incomingMessages = Array.isArray(message) ? message : [message];

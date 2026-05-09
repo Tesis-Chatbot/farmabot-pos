@@ -54,7 +54,6 @@ export const getClientByCard = async (cardNumber) => {
 
   try {
     // El log ahora debería aparecer justo antes de que veas la petición en Network
-    console.log("🚀 Disparando petición a la API...");
     const response = await api.get(`/clientes/${cardNumber}`);
     return response.data;
   } catch (error) {
@@ -90,7 +89,6 @@ export const getPromotionTypes = async () => {
  */
 export const upsertPromotion = async (promoData) => {
   try {
-    console.log("Enviando promoción a la API...", promoData);
     const response = await api.post("/promociones", promoData);
     return response.data;
   } catch (error) {
