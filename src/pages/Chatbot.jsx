@@ -12,14 +12,6 @@ import {
   Smile,
 } from "lucide-react";
 
-const socket = io("http://localhost:5005", {
-  transports: ["websocket"],
-  path: "/socket.io/",
-  reconnection: true,
-  reconnectionAttempts: 5,
-  timeout: 10000,
-});
-
 export default function ChatReal() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -37,19 +29,35 @@ export default function ChatReal() {
   ]);
 
   const messagesEndRef = useRef(null);
+  const socketRef = useRef(null); // 👈 Ref para el socket
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    // Cuando se conecte, pedir la sesión
+    // Inicializar Socket.IO v2
+    const socket = io("http://localhost:5005", {
+      transports: ["websocket"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      timeout: 10000,
+    });
+
+    socketRef.current = socket;
+
     socket.on("connect", () => {
+      console.log("✅ Conectado a Socket.IO:", socket.id);
       setIsConnected(true);
       socket.emit("session_request", { session_id: "session_user_123" });
     });
 
+    socket.on("connect_error", (error) => {
+      console.error("❌ Error de conexión:", error);
+    });
+
     socket.on("bot_uttered", (message) => {
+      console.log("📩 Mensaje recibido:", message);
       setIsTyping(false);
 
       const incomingMessages = Array.isArray(message) ? message : [message];
@@ -72,15 +80,19 @@ export default function ChatReal() {
 
     socket.on("disconnect", () => setIsConnected(false));
 
-    // Limpieza al desmontar el componente
+    // Limpieza
     return () => {
+      socket.disconnect();
       socket.off("connect");
+      socket.off("connect_error");
       socket.off("bot_uttered");
       socket.off("disconnect");
     };
   }, []);
 
-  useEffect(scrollToBottom, [messages, isTyping]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isTyping]);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -96,13 +108,15 @@ export default function ChatReal() {
     };
 
     setMessages((prev) => [...prev, userMsg]);
-    setIsTyping(true); // Mostramos los puntitos de carga
+    setIsTyping(true);
 
-    // Enviar a Rasa
-    socket.emit("user_uttered", {
-      message: input,
-      session_id: "session_user_123", // DEBE ser el mismo que arriba
-    });
+    // Usar la referencia del socket
+    if (socketRef.current) {
+      socketRef.current.emit("user_uttered", {
+        message: input,
+        session_id: "session_user_123",
+      });
+    }
 
     setInput("");
   };
