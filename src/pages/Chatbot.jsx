@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import io from "socket.io-client";
 import {
   Send,
   Bot,
@@ -29,70 +28,126 @@ export default function ChatReal() {
   ]);
 
   const messagesEndRef = useRef(null);
-  const socketRef = useRef(null); // 👈 Ref para el socket
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Verificar conexión con Rasa
   useEffect(() => {
-    // Inicializar Socket.IO v2
-    const socket = io("http://localhost:5005", {
-      transports: ["websocket"],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      timeout: 10000,
-    });
-
-    socketRef.current = socket;
-
-    socket.on("connect", () => {
-      console.log("✅ Conectado a Socket.IO:", socket.id);
-      setIsConnected(true);
-      socket.emit("session_request", { session_id: "session_user_123" });
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error("❌ Error de conexión:", error);
-    });
-
-    socket.on("bot_uttered", (message) => {
-      console.log("📩 Mensaje recibido:", message);
-      setIsTyping(false);
-
-      const incomingMessages = Array.isArray(message) ? message : [message];
-
-      incomingMessages.forEach((msg) => {
-        if (msg.text) {
-          const newMessage = {
-            id: Date.now() + Math.random(),
-            sender: "bot",
-            text: msg.text,
-            time: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-          };
-          setMessages((prev) => [...prev, newMessage]);
+    const checkConnection = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5005",
+        );
+        if (response.ok) {
+          setIsConnected(true);
+          console.log("✅ Conectado a Rasa");
         }
-      });
-    });
-
-    socket.on("disconnect", () => setIsConnected(false));
-
-    // Limpieza
-    return () => {
-      socket.disconnect();
-      socket.off("connect");
-      socket.off("connect_error");
-      socket.off("bot_uttered");
-      socket.off("disconnect");
+      } catch (error) {
+        setIsConnected(false);
+        console.log("❌ Rasa no disponible");
+      }
     };
+
+    checkConnection();
+    const interval = setInterval(checkConnection, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
+
+  const sendToRasa = async (message) => {
+  setIsTyping(true);
+  try {
+    // Usar el endpoint de mensajes de la API (no el execute)
+    const response = await fetch(
+      "http://127.0.0.1:5005/webhooks/rest/webhook",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: "session_user_123",
+          message: message,
+        }),
+        mode: 'cors', // Importante para CORS
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log("📩 Respuesta:", data);
+      
+      if (Array.isArray(data)) {
+        data.forEach(msg => {
+          if (msg.text) {
+            setMessages(prev => [...prev, {
+              id: Date.now() + Math.random(),
+              sender: "bot",
+              text: msg.text,
+              time: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            }]);
+          }
+        });
+      }
+    } else {
+      // Si falla el webhook, intentar con el endpoint alternativo
+      throw new Error(`Error ${response.status}`);
+    }
+  } catch (error) {
+    console.log("Intentando endpoint alternativo...");
+    
+    // Plan B: Usar el endpoint de conversaciones que ya funciona
+    try {
+      const altResponse = await fetch(
+        "http://127.0.0.1:5005/conversations/session_user_123/respond",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: message,
+          }),
+        }
+      );
+      
+      if (altResponse.ok) {
+        const altData = await altResponse.json();
+        console.log("📩 Respuesta alternativa:", altData);
+        
+        // Procesar respuesta
+        if (altData.text) {
+          setMessages(prev => [...prev, {
+            id: Date.now() + Math.random(),
+            sender: "bot",
+            text: altData.text,
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          }]);
+        }
+      }
+    } catch (altError) {
+      console.error("Error en ambos endpoints:", altError);
+      setMessages(prev => [...prev, {
+        id: Date.now(),
+        sender: "bot",
+        text: "Lo siento, hubo un error de comunicación. ¿Puedes intentarlo de nuevo?",
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      }]);
+    }
+  } finally {
+    setIsTyping(false);
+  }
+};
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -108,16 +163,7 @@ export default function ChatReal() {
     };
 
     setMessages((prev) => [...prev, userMsg]);
-    setIsTyping(true);
-
-    // Usar la referencia del socket
-    if (socketRef.current) {
-      socketRef.current.emit("user_uttered", {
-        message: input,
-        session_id: "session_user_123",
-      });
-    }
-
+    sendToRasa(input);
     setInput("");
   };
 
