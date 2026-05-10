@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../api/useAuth";
-import { useNavigate } from "react-router-dom";
+import { AuthProvider, useAuthContext, ROLES } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -8,8 +7,7 @@ export default function Login() {
   const [errorLocal, setErrorLocal] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const { login } = useAuthContext();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,20 +16,15 @@ export default function Login() {
 
     try {
       await login(email, password);
-      // Una vez logueado con éxito, redirigimos al POS
-      navigate("/");
+      // No hace falta navigate, el Contexto hace el render de la ruta protegida solo
     } catch (err) {
-      // Traducimos errores comunes de Supabase
-      if (err.message === "Invalid login credentials") {
-        setErrorLocal("Correo o contraseña incorrectos.");
-      } else {
-        setErrorLocal(err.message);
-      }
+      setErrorLocal(err.message === "Invalid login credentials" 
+        ? "Correo o contraseña incorrectos." 
+        : err.message);
     } finally {
       setIsSubmitting(false);
     }
   };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-100 w-full px-4">
       <form
@@ -40,7 +33,7 @@ export default function Login() {
       >
         <div className="text-center mb-8">
           <h2 className="text-3xl font-extrabold text-slate-800">
-            Software POS
+            FarmaBot POS
           </h2>
           <p className="text-slate-500 mt-2">
             Ingresa tus credenciales para continuar

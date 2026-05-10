@@ -39,9 +39,9 @@ api.interceptors.request.use(
   },
 );
 
-export const getMedicaments = async () => {
+export const getMedicaments = async (storeId) => {
   try {
-    const response = await api.get("/medicamentos");
+    const response = await api.get(`/medicamentos?store_id=${storeId}`);
     return response.data;
   } catch (error) {
     console.error("Error al obtener medicamentos:", error);
@@ -54,7 +54,6 @@ export const getClientByCard = async (cardNumber) => {
 
   try {
     // El log ahora debería aparecer justo antes de que veas la petición en Network
-    console.log("🚀 Disparando petición a la API...");
     const response = await api.get(`/clientes/${cardNumber}`);
     return response.data;
   } catch (error) {
@@ -66,6 +65,66 @@ export const getClientByCard = async (cardNumber) => {
       error.response?.data || error.message,
     );
     throw error;
+  }
+};
+
+/**
+ * Obtiene el catálogo de tipos de promoción (1-4)
+ * Útil para llenar un <select> en el formulario
+ */
+export const getPromotionTypes = async () => {
+  try {
+    const response = await api.get("/promotion_types"); // Asumiendo que tienes este endpoint simple
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener tipos de promoción:", error);
+    throw error;
+  }
+};
+
+/**
+ * Crea o actualiza una promoción para un medicamento específico.
+ * Solo permite una promoción activa por barcode.
+ * @param {Object} promoData { barcode, promotion_type, amount, active }
+ */
+export const upsertPromotion = async (promoData) => {
+  try {
+    const response = await api.post("/promociones", promoData);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error al gestionar promoción:",
+      error.response?.data?.detail || error.message,
+    );
+    throw error;
+  }
+};
+
+/**
+ * Obtiene la lista de medicamentos que tienen promociones vigentes
+ */
+export const getActivePromotions = async () => {
+  try {
+    const response = await api.get("/promociones/activas");
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener promociones activas:", error);
+    throw error;
+  }
+};
+
+/**
+ * Procesa la venta final en el POS (Con stock y folio)
+ * @param {Object} saleData { items, total, store_id, card_number }
+ */
+export const postSale = async (saleData) => {
+  try {
+    const response = await api.post("/ventas", saleData);
+    return response.data;
+  } catch (error) {
+    const errorMsg = error.response?.data?.detail || "Error en la transacción";
+    console.error("Error en Venta:", errorMsg);
+    throw new Error(errorMsg); // Lanzamos el error con el mensaje de la API (ej: stock insuficiente)
   }
 };
 

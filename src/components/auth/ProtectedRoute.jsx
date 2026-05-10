@@ -1,8 +1,8 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../../api/useAuth";
+import { AuthProvider, useAuthContext, ROLES } from "../../context/AuthContext";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuthContext();
 
   // 1. Mientras carga, no redirigimos a ningún lado
   if (loading) {
