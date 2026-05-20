@@ -16,6 +16,7 @@ const menuItems = [
   { icon: <PillBottle />, label: "Promociones", path: "/promociones", roles: [ROLES.ADMIN] },
   { icon: <BarChart3 size={22} />, label: "Reportes", path: "/reportes", roles: [ROLES.ADMIN] },
   { icon: <MessageSquareCode size={22} />, label: "Chatbot", path: "/chatbot", roles: [ROLES.ADMIN, ROLES.CAJERO] },
+  { icon: <LayoutDashboard size={22} />, label: "Dashboard", path: "/dashboard", roles: [ROLES.ADMIN] },
 ];
 
 export default function Sidebar() {

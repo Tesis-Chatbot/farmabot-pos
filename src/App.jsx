@@ -7,6 +7,7 @@ import PromotionsAdmin from "./pages/PromocionesAdmin";
 import ReportsDashboard from "./pages/Dashboard";
 import Chatbot from "./pages/Chatbot";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import RegisterCashier from "./pages/RegisterCashier";
 import { AuthProvider, useAuthContext, ROLES } from "./context/AuthContext";
 
 function AppContent() {
@@ -38,6 +39,7 @@ function AppContent() {
           {/* Rutas Admin */}
           <Route path="/promociones" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]}><PromotionsAdmin /></ProtectedRoute>} />
           <Route path="/reportes" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]}><ReportsDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]}><RegisterCashier /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
